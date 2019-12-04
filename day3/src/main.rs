@@ -1,28 +1,34 @@
 use std::i32::MAX;
-
-fn getFinalPoint(initialPoint:&mut (i32,i32),direction:&str,distance:i32){
+#[derive(Copy,Clone)]
+struct Point{
+    x:i32,
+    y:i32
+}
+fn getFinalPoint(initialPoint:&Point,direction:&str,distance:i32)->Point{
+    let mut finalPoint = Point{x:initialPoint.x,y:initialPoint.y};
     if direction == "R" {
-        initialPoint.0 += distance;
+        finalPoint.x += distance;
     }
     if direction == "L" {
-        initialPoint.0 -= distance;
+        finalPoint.x -= distance;
     }
     if direction == "U" {
-        initialPoint.1 -= distance;
+        finalPoint.y -= distance;
     }
     if direction == "D" {
-        initialPoint.1 += distance
+        finalPoint.y += distance
     }
+    return finalPoint;
 }
 
-fn tracePath(commands: &[&str]) -> Vec<(i32, i32)> {
+fn tracePath(commands: &[&str]) -> Vec<Point> {
     let mut path = vec![];
-    let mut point = (0, 0);
+    let mut point = Point{x:0,y:0};
     for command in commands {
         let direction = &command[..1];
         let rawDistance = &command[1..]; //in string format
         let distance: i32 = rawDistance.parse().unwrap();
-        getFinalPoint(&mut point,direction,distance);
+        point = getFinalPoint(&point,direction,distance);
         path.push(point);
     }
     return path;
@@ -32,30 +38,30 @@ fn isLies(p: i32, p1: i32, p2: i32) -> bool {
     return (p1 <= p && p <= p2) || (p1 >= p && p >= p2);
 }
 
-fn getIntersectionPoint(p1: (i32, i32), q1: (i32, i32), p2: (i32, i32), q2: (i32, i32)) -> (i32, i32) {
-    if p1.0 == q1.0 && p2.1 == q2.1 {
-        if isLies(p1.0, p2.0, q2.0) && isLies(p2.1, p1.1, q1.1) {
-            return (p1.0, p2.1);
+fn getIntersectionPoint(p1: Point, q1:Point, p2: Point, q2:Point) -> Point {
+    if p1.x == q1.x && p2.y == q2.y {
+        if isLies(p1.x, p2.x, q2.x) && isLies(p2.y, p1.y, q1.y) {
+            return Point{x:p1.x, y:p2.y};
         }
     }
-    if p1.1 == q1.1 && p2.0 == q2.0 {
-        if isLies(p1.1, p2.1, q2.1) && isLies(p2.0, p1.0, q1.0) {
-            return (p2.0, p1.1);
+    if p1.y == q1.y && p2.x == q2.x {
+        if isLies(p1.y, p2.y, q2.y) && isLies(p2.x, p1.x, q1.x) {
+            return Point{x:p2.x, y:p1.y};
         }
     }
-    return (0, 0);
+    return Point{x:0,y:0};
 }
 
 
-fn isValidIntersection(point: (i32, i32)) -> bool {
-    return point.0 != 0 || point.1 != 0;
+fn isValidIntersection(point: Point) -> bool {
+    return point.x != 0 || point.y != 0;
 }
 
-fn getIntersections(path1: &Vec<(i32, i32)>, path2: &Vec<(i32, i32)>) -> Vec<(i32, i32)> {
+fn getIntersections(path1: &Vec<Point>, path2: &Vec<Point>) -> Vec<Point> {
     let mut intersections = vec![];
-    let mut p1 = (0, 0);
+    let mut p1 = Point{x:0,y:0};
     for q1 in path1 {
-        let mut p2 = (0, 0);
+        let mut p2 = Point{x:0,y:0};
         for q2 in path2 {
             let interesectionPoint = getIntersectionPoint(p1, *q1, p2, *q2);
             if isValidIntersection(interesectionPoint) {
@@ -68,10 +74,10 @@ fn getIntersections(path1: &Vec<(i32, i32)>, path2: &Vec<(i32, i32)>) -> Vec<(i3
     return intersections;
 }
 
-fn getMinimumDistance(intersections: &Vec<(i32, i32)>) -> i32 {
+fn getMinimumDistance(intersections: &Vec<Point>) -> i32 {
     let mut minimumDistance = MAX;
     for intersection in intersections {
-        let distance = intersection.0.abs() + intersection.1.abs();
+        let distance = intersection.x.abs() + intersection.y.abs();
         if distance < minimumDistance {
             minimumDistance = distance;
         }
@@ -79,23 +85,23 @@ fn getMinimumDistance(intersections: &Vec<(i32, i32)>) -> i32 {
     return minimumDistance;
 }
 
-fn getDistance(p: (i32, i32), q: (i32, i32)) -> i32 {
-    return (p.0 - q.0).abs() + (p.1 - q.1).abs();
+fn getDistance(p: Point, q: Point) -> i32 {
+    return (p.x - q.x).abs() + (p.y - q.y).abs();
 }
 
-fn isPointLies(p: (i32, i32), a: (i32, i32), b: (i32, i32)) -> bool {
-    if p.0 == a.0 && a.0 == b.0 {
-        return isLies(p.1, a.1, b.1);
+fn isPointLies(p: Point, a: Point, b: Point) -> bool {
+    if p.x == a.x && a.x == b.x {
+        return isLies(p.y, a.y, b.y);
     }
-    if p.1 == a.1 && a.1 == b.1 {
-        return isLies(p.0, a.0, b.0);
+    if p.y == a.y && a.y == b.y {
+        return isLies(p.x, a.x, b.x);
     }
     return false;
 }
 
-fn getSteps(intersection: (i32, i32), path: &Vec<(i32, i32)>) -> i32 {
+fn getSteps(intersection: Point, path: &Vec<Point>) -> i32 {
     let mut steps = 0;
-    let mut p = (0, 0);
+    let mut p = Point{x:0,y:0};
     for &q in path {
         if isPointLies(intersection, p, q) {
             steps += getDistance(intersection, p);
@@ -107,7 +113,7 @@ fn getSteps(intersection: (i32, i32), path: &Vec<(i32, i32)>) -> i32 {
     return steps;
 }
 
-fn getMinimumSteps(intersections: Vec<(i32, i32)>, path1: &Vec<(i32, i32)>, path2: &Vec<(i32, i32)>) -> i32 {
+fn getMinimumSteps(intersections: Vec<Point>, path1: &Vec<Point>, path2: &Vec<Point>) -> i32 {
     let mut minimumSteps = MAX;
     for intersection in intersections {
         let steps = getSteps(intersection, path1) + getSteps(intersection, path2);
