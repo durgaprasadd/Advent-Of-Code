@@ -6,42 +6,23 @@ fn intcodeCompute(input: &mut [i64], inputID: i64) -> i64 {
     while address < limit {
         let code = input[address];
         let opcode = code % 100;
-        if opcode == 1 {
-            opcode1(input, address, code / 100, relativeBase);
-            address += 4;
+        match opcode {
+            1 => opcode1(input, address, code / 100, relativeBase),
+            2 => opcode2(input, address, code / 100, relativeBase),
+            3 => opcode3(input, address, inputID, code / 100, relativeBase),
+            4 => diagnosticCode = opcode4(input, address, code / 100, relativeBase),
+            5 => address = opcode5(input, address, code / 100, relativeBase),
+            6 => address = opcode6(input, address, code / 100, relativeBase),
+            7 => opcode7(input, address, code / 100, relativeBase),
+            8 => opcode8(input, address, code / 100, relativeBase),
+            9 => relativeBase += opcode9(input, address, code / 100, relativeBase),
+            _ => break
         }
-        if opcode == 2 {
-            opcode2(input, address, code / 100, relativeBase);
-            address += 4;
-        }
-        if opcode == 3 {
-            opcode3(input, address, inputID, code / 100, relativeBase);
-            address += 2;
-        }
-        if opcode == 4 {
-            diagnosticCode = opcode4(input, address, code / 100, relativeBase);
-            address += 2;
-        }
-        if opcode == 5 {
-            address = opcode5(input, address, code / 100, relativeBase);
-        }
-        if opcode == 6 {
-            address = opcode6(input, address, code / 100, relativeBase);
-        }
-        if opcode == 7 {
-            opcode7(input, address, code / 100, relativeBase);
-            address += 4;
-        }
-        if opcode == 8 {
-            opcode8(input, address, code / 100, relativeBase);
-            address += 4;
-        }
-        if opcode == 9 {
-            relativeBase += opcode9(input, address, code / 100, relativeBase);
-            address += 2;
-        }
-        if opcode == 99 {
-            break;
+
+        match opcode {
+            1 | 2 | 7 | 8 => address += 4,
+            3 | 4 | 9 => address += 2,
+            _ => address += 0
         }
     }
     return diagnosticCode;
@@ -86,7 +67,7 @@ fn opcode2(input: &mut [i64], address: usize, code: i64, relativeBase: i64) {
 }
 
 fn opcode3(input: &mut [i64], address: usize, inputID: i64, code: i64, relativeBase: i64) {
-    saveAtDestination(input,address+1,code%10,relativeBase,inputID);
+    saveAtDestination(input, address + 1, code % 10, relativeBase, inputID);
 }
 
 fn opcode4(input: &mut [i64], address: usize, code: i64, relativeBase: i64) -> i64 {
@@ -141,9 +122,9 @@ fn opcode7(input: &mut [i64], address: usize, code: i64, relativeBase: i64) {
     modes /= 10;
     let secondParam = getParam(input, modes % 10, address + 2, relativeBase);
     modes /= 10;
-    saveAtDestination(input,address+3,modes%10,relativeBase,0);
+    saveAtDestination(input, address + 3, modes % 10, relativeBase, 0);
     if firstParam < secondParam {
-        saveAtDestination(input,address+3,modes%10,relativeBase,1);
+        saveAtDestination(input, address + 3, modes % 10, relativeBase, 1);
     }
 }
 
@@ -153,9 +134,9 @@ fn opcode8(input: &mut [i64], address: usize, code: i64, relativeBase: i64) {
     modes /= 10;
     let secondParam = getParam(input, modes % 10, address + 2, relativeBase);
     modes /= 10;
-    saveAtDestination(input,address+3,modes%10,relativeBase,0);
+    saveAtDestination(input, address + 3, modes % 10, relativeBase, 0);
     if firstParam == secondParam {
-        saveAtDestination(input,address+3,modes%10,relativeBase,1);
+        saveAtDestination(input, address + 3, modes % 10, relativeBase, 1);
     }
 }
 
