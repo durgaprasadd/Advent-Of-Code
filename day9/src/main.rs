@@ -185,5 +185,5 @@ fn main() {
     let mut diagnosticCode = intcodeCompute(&mut inputCopy, 1);
     println!("diagnostic code from part 1 {}", diagnosticCode);
     diagnosticCode = intcodeCompute(&mut inputCopy, 2);
-    println!("diagnostic code from part 1 {}", diagnosticCode);
+    println!("diagnostic code from part 2 {}", diagnosticCode);
 }
