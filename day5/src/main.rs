@@ -5,38 +5,22 @@ fn intcodeCompute(input: &mut [i32], inputID: i32) -> i32 {
     while address < limit {
         let code = input[address];
         let opcode = code % 100;
-        if opcode == 1 {
-            opcode1(input, address, code / 100);
-            address += 4;
+        match opcode {
+            1 => opcode1(input, address, code / 100),
+            2 => opcode2(input, address, code / 100),
+            3 => opcode3(input, address, inputID),
+            4 => diagnosticCode = opcode4(input, address),
+            5 => address = opcode5(input, address, code / 100),
+            6 => address = opcode6(input, address, code / 100),
+            7 => opcode7(input, address, code / 100),
+            8 => opcode8(input, address, code / 100),
+            _ => break
         }
-        if opcode == 2 {
-            opcode2(input, address, code / 100);
-            address += 4;
-        }
-        if opcode == 3 {
-            opcode3(input, address, inputID);
-            address += 2;
-        }
-        if opcode == 4 {
-            diagnosticCode = opcode4(input, address);
-            address += 2;
-        }
-        if opcode == 5 {
-            address = opcode5(input, address, code / 100);
-        }
-        if opcode == 6 {
-            address = opcode6(input, address, code / 100);
-        }
-        if opcode == 7 {
-            opcode7(input, address, code / 100);
-            address += 4;
-        }
-        if opcode == 8 {
-            opcode8(input, address, code / 100);
-            address += 4;
-        }
-        if opcode == 99 {
-            break;
+
+        match opcode {
+            1 | 2 | 7 | 8 => address += 4,
+            3 | 4  => address += 2,
+            _ => address += 0
         }
     }
     return diagnosticCode;
